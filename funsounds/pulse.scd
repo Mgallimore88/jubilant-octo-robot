@@ -1,0 +1,31 @@
+//pulseTest
+
+(
+SynthDef.new("pulse", {
+	arg ampHz = 4, fund = 40, max_partial = 4, width = 0.5;
+	var amp1, amp2, freq1, freq2, sig1, sig2;
+	amp1 = LFPulse.kr(ampHz, 0, 0.12) * 0.75;
+	amp2 = LFPulse.kr(ampHz, 0.5, 0.12) * 0.75;
+	freq1 = LFNoise1.kr(10).exprange(fund, fund * max_partial).round(fund);
+	freq2 = LFNoise1.kr(10).exprange(fund, fund * max_partial).round(fund);
+	freq1 = freq1 * LFPulse.kr(8, add:1); //octave
+	freq2 = freq2 * LFPulse.kr(6, add:1);
+	sig1 = Pulse.ar(freq1, width, amp1);
+	sig2 = Pulse.ar(freq2, width, amp2);
+	sig1 = FreeVerb.ar(sig1, 0.7, 0.8, 0.25);
+	sig2 = FreeVerb.ar(sig2, 0.7, 0.8, 0.25);
+	Out.ar(0, sig1);
+	Out.ar(1, sig2);
+}).add
+)
+x = Synth.new(\pulse,[\fund, 100, \ampHz, 2, \max_partial, 8, \width, 0.5]);
+y = Synth.new(\pulse);
+z = Synth.new(\pulse);
+x.set(\fund, 100, \ampHz, 2, \max_partial, 8, \width, 0.5);
+y.set(\fund, 60, \ampHz, 4, \max_partial, 2, \width, 0.5);
+z.set(\fund, 80, \ampHz, 1, \max_partial,3, \width, 0.1);
+
+x.free
+y.free;
+z.free;
+s.scope
