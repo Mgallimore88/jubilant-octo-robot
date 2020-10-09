@@ -1,0 +1,1 @@
+{SinOscFB.ar(440,MouseX.kr(0,4))*0.1}.play

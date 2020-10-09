@@ -1,0 +1,22 @@
+Server.local.plotTree; // shows what the server is running. unfr
+s.quit
+
+{SinOsc.ar(1000)}.play
+
+
+
+x = {PinkNoise.ar * 0.5}.play
+// sound will start and stop instantaneously.
+x.free
+
+//use envelopes
+// >> Browse - UGens >> envelopes
+// Line is an enveloe with start, end and duration args. also has a doneAction arg.
+(
+x = {
+	var sig, env;
+	sig = Pulse.ar(ExpRand.new(900, 1000)) * 1;
+}.play;
+)
+x.free
+
