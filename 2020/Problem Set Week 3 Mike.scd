@@ -15,6 +15,10 @@ x
 {exprand(100, 2000)}.dup(16);
 
 
+// improvements after seeing Ed's code:
+
+{exprand(100, 2000).asInteger}!(16)
+
 //Problem 2
 //Generate an array containing 16 random odd integers between 100 and 2000. Use a linear distribution, so that the values are equally distributed across this range.
 
@@ -50,6 +54,11 @@ if (x.odd,
 
 x = Array.fill(16, ~oddnum);
 
+// more elegant solution from Ed:
+Array.fill(16, {(101, 103..1999).choose})
+// putting choose inside the function gets a new value from the array each time.
+
+(1, 3..10) // is a neat way of specifying the start, step and endpoint of an array.
 
 
 //Problem 3
@@ -67,12 +76,29 @@ expindexes.collect({
 )
 ~expFifties
 
+// ed's solution:
+(
+a = Array.fill(16,
+	{exprand(100,2000).round(50).asInteger});
+)
+// the 'round(50)' is one part I was missing.
+
+
+
 //Problem 4
 //Using the global variable from the previous problem, write some code that adds to the array four more multiples of 50 between 2000 and 3000. Use a linear distribution. The same global variable should now store this new, larger array.
 
 ~expFifties
-~expFifties = ~expFifties ++ (4.collect({20.rand() * 50 + 2050}))
 
+~expFifties = ~expFifties ++ (4.collect({20.rand() * 50 + 2050}))
+// my solution uses collect instead of do, and appends scaled random numbers to the end of an array
+
+// Ed's solution:
+(
+4.do({
+	~expFifties = ~expFifties.add(rrand(2000,3000).round(50));
+});
+)
 ~expFifties
 
 //Problem 5
@@ -101,6 +127,9 @@ expindexes.collect({
 
 ~overtones
 
+// Ed's solution:
+Array.series(12, 350, 350);
+
 
 
 
@@ -121,9 +150,11 @@ expindexes.collect({
 
 ~amplitudes
 
+// Ed's
+Array.geom(8, 1, 0.5);
+
 //Problem 8
 //Use one or more iteration methods (do, collect, select, reject, etc.) to return an integer corresponding to the number of multiples of 100 that are contained in the array of 20 values (stored in your global variable from Problem 4).
-
 
 
 (
@@ -133,11 +164,16 @@ expindexes.collect({
 })
 )
 
+// Ed's
+~expFifties.select({ arg n; (n % 100) == 0 }).size;
+// or
+(
+~expFifties.collect({ arg n; if(n%100 == 0, {1}, {0})
+}).sum;
+)
 
 //before continuing, boot the audio server:
 Server.local.boot;
-
-
 
 //Problem 9
 //Consider the following UGen function, which produces a 2-channel sine wave with a frequency of 300 Hz and amplitude of 0.1. Use iteration to play this function five times, such that each instance has a random frequency between 200 and 1000 (exponential distribution).
@@ -152,7 +188,18 @@ x = {
 )
 (0!5).do({x.play})
 
-
+// Ed's solution populates the array earlier in the function:
+(
+Array.exprand(5, 200, 1000).do({
+	arg n;
+	{
+		var sig;
+		sig = SinOsc.ar(n);
+		sig = sig * 0.1;
+		sig!2;
+	}.play;
+});
+)
 
 
 //Problem 10
@@ -180,14 +227,33 @@ x = {
 	{
 	var sig;
 	sig = SinOsc.ar(freq);
-		i.postln;
-		sig = sig * 0.5 * (0.75.pow(i));
+	sig = sig * 0.5 * (0.75.pow(i));
 	sig!2;
 	}.play;
 });
 )
 
 
+// Ed's solution:
+
+// declare a local variable:
+var amp;
+
+// which holds an array containing the amplitude modifiers:
+~amp = Array.geom(~expFifties.size, 0.1, 0.75).sort;
+
+
+(
+~expFifties.do({
+	arg freq, i;
+	{
+	var sig;
+	sig = SinOsc.ar(freq);
+		sig = sig * ~amp.at(i);
+	sig!2;
+	}.play;
+});
+)
 
 
 
@@ -248,6 +314,26 @@ rrand(0, 4)
 	sig!2;
 	}.play;
 });
+)
+
+
+//Ed's solution:
+(
+var newArray;
+newArray = ~expFifties.sort.stutter;
+newArray;
+newArray.do({
+	arg n, i;
+	if (i.odd, {n = n + rrand(0.0, 4.0)});
+	{
+		var sig;
+		sig = SinOsc.ar(n);
+		sig = sig * 0.1 * 0.75.pow(i/2);
+		sig!2;
+	}.play;
+});
+)
+
 )
 
 
