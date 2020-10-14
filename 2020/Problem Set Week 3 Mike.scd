@@ -36,7 +36,7 @@ if (x.odd,
 )
 
 
-// ODD NUMVBER GENERATOR attempt 2 - works!! :
+// ODD NUMBER GENERATOR attempt 2 - working :
 
 (
 var odd, x;
@@ -47,50 +47,60 @@ if (x.odd,
 	~oddnum; // if the number is odd, store it in x, else call the function again until it is odd
 )}
 )
-~oddnum.value
 
-// odd number generator - returns an odd number or the word even.
-(
-var number;
-number = rrand(100, 2000);
-if (number.odd,
-{number = number},
-	{number = "even"});
-)
+x = Array.fill(16, ~oddnum);
 
-
-~myfunc = {4 + 5};
-~myfunc
-
-(
-var odd
-if(y.size<16, {y = y.add(odd);
-
-y = {rrand(100, 2000)}.dup(16);
-
-y.collect({arg n; n.odd});
-
-y.size
-)
 
 
 //Problem 3
 //Generate an array containing 16 random integer multiples of 50 between 100 and 2000. Use an exponential distribution. Also, use a global variable to store the array.
+(
+~expFifties = {
+var fifties = Array.series(39, 100, 50);
+var expindexes = {Array.fill(16, {exprand(1,17).round -1})}.value;
 
-
+expindexes.collect({
+	|n|
+	n.postln;
+	fifties[n];})
+}.value
+)
+~expFifties
 
 //Problem 4
 //Using the global variable from the previous problem, write some code that adds to the array four more multiples of 50 between 2000 and 3000. Use a linear distribution. The same global variable should now store this new, larger array.
 
+~expFifties
+~expFifties = ~expFifties ++ (4.collect({20.rand() * 50 + 2050}))
 
+~expFifties
 
 //Problem 5
 //Write some code that plots a graph of the contents of the new, larger array that you created in the previous problem. Arrays respond to the "plot" method. (no need to overthink this problem.)
+
+~expFifties.sort
+~expFifties.plot
 
 
 
 //Problem 6
 //Use the "series" method to generate an array of numbers that represent frequencies of the first 12 harmonics of the overtone series, with a fundamental starting at 350 Hz (include the fundamental, 12 frequencies total).
+(
+~overtones = {
+	var f, a;
+	f = 350;
+	a = Array.series(12, 1, 1);
+	a.postln;
+	a.collect
+	({
+		|n, index|
+		a[index] * f;
+	});
+}.value;
+)
+
+~overtones
+
 
 
 
@@ -98,10 +108,30 @@ y.size
 //Use the "geom" method to generate an array of 8 numbers that represent signal amplitude. The first value should be 1, and each subsequent number should be equal to half the previous number.
 
 
+(
+~amplitudes = {
+	    var init;
+		init = 1;
+	(1!8).collect({
+
+		init = init / 2;
+	})
+}.value
+)
+
+~amplitudes
 
 //Problem 8
 //Use one or more iteration methods (do, collect, select, reject, etc.) to return an integer corresponding to the number of multiples of 100 that are contained in the array of 20 values (stored in your global variable from Problem 4).
 
+
+
+(
+~expFifties.select({
+	|x, index|
+	(x % 100) == 0
+})
+)
 
 
 //before continuing, boot the audio server:
@@ -113,30 +143,51 @@ Server.local.boot;
 //Consider the following UGen function, which produces a 2-channel sine wave with a frequency of 300 Hz and amplitude of 0.1. Use iteration to play this function five times, such that each instance has a random frequency between 200 and 1000 (exponential distribution).
 
 (
-{
-	var sig;
-	sig = SinOsc.ar(300);
+x = {
+	var sig, freq = exprand(200, 1000);
+	sig = SinOsc.ar(freq);
 	sig = sig * 0.1;
 	sig!2;
-}.play;
+};
 )
+(0!5).do({x.play})
+
 
 
 
 //Problem 10
 //Once again, consider the same UGen function. This time, use your global variable that holds the array of 20 values. Iterate over your array, using the values within as frequency values for SinOsc.
 
+
+(
+x = {
+	arg freq = 400;
+	var sig;
+	sig = SinOsc.ar(freq);
+	sig = sig * 0.1;
+	sig!2;
+};
+)
+
+// to pass in an argument, define it as an argument in the parent function, then it will be accessible in the child function.
+
 ***IMPORTANT***
 //Note that the amplitude has been intentionally lowered from 0.1 to 0.02, because 20 summed waveforms is louder than 5! Be mindful of ear safety!
 
 (
-{
+~expFifties.do({
+	arg freq, i;
+	{
 	var sig;
-	sig = SinOsc.ar(300);
-	sig = sig * 0.02;
+	sig = SinOsc.ar(freq);
+		i.postln;
+		sig = sig * 0.5 * (0.75.pow(i));
 	sig!2;
-}.play;
+	}.play;
+});
 )
+
+
 
 
 
@@ -156,6 +207,21 @@ access the iteration count)
 
 //The result should be a more "bass-heavy" timbre.
 
+(
+~expFifties.do({
+	arg freq, i;
+	{
+	var sig;
+	sig = SinOsc.ar(freq);
+		i.postln;
+		sig = sig * 0.5 * (0.75.pow(i));
+	sig!2;
+	}.play;
+});
+)
+
+
+
 
 
 //Bonus Question (+1 pt)
@@ -163,3 +229,25 @@ access the iteration count)
 
 //your frequency array might look something like:
 [150, 153.47338628769, 250, 251.30930900574, 300, 302.16426753998, ...etc... ]
+
+rrand(0, 4)
+
+
+~richFifties = ~expFifties.collect{arg n; {n + rrand(0.0, 4.0)}.value }
+~richFifties = ~richFifties ++ ~expFifties
+~richFifties.sort
+
+(
+~richFifties.do({
+	arg freq, i;
+	{
+	var sig;
+	sig = SinOsc.ar(freq);
+		i.postln;
+		sig = sig * 0.25 * (0.75.pow(i));
+	sig!2;
+	}.play;
+});
+)
+
+
