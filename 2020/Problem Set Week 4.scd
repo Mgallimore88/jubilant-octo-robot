@@ -30,6 +30,12 @@
 }.play
 )
 
+//In the first example the freqmod signal frequency is higher than the control rate sampling frequency so the 325 Hz signal is not accurately described, and has some alias frequencies present. Using an .ar to describe the wave produces a frequency modulated signal - the carrier signal is 650 Hz and is modulated by a 325Hz signal
+
+// the second example is an lfo , the 650Hz signal is modulated by a 6Hz signal which adds and subtracts 300Hz from the carrier at a frequency of 6Hz.
+
+
+
 
 
 //Problem 2
@@ -48,9 +54,15 @@ f.play; //then me
 
 f.free; //and finally run me
 
+
+
 //Notice that the ".free" method does not stop the sound (press command-period to do so). Add a comment, in your own words, explaining why the ".free" method doesn't work.
 
+// f is the function which defines the audio signal. Calling play on the function will play the audio, but calling .free on the same function does not target the sound generator. instead we need to define a new variable to hold the play function - either reassign f = f.play, but this overwrites the synth def, or x = f.play, as below.
 
+x = f.play;
+
+x.free;
 
 
 
@@ -65,7 +77,7 @@ f.free; //and finally run me
 			[1,0],
 			[4],
 			[-3]
-		)
+		),doneAction:2
 	);
 	sig = Blip.ar([300,305], 16);
 	sig = sig * LFPulse.kr(12, width:0.2);
@@ -74,7 +86,7 @@ f.free; //and finally run me
 }.play
 )
 
-
+// The envelope had no doneAction attribute, hence carried on producing zeros after the sound finished playing.
 
 //Problem 4
 //The following UGen function is supposed to play a tone with a 1 second fade-in and 1 second fade out. But, we just hear a steady tone for 2 seconds. What's wrong? Fix the issue and add a comment.
@@ -92,8 +104,11 @@ f.free; //and finally run me
 		doneAction:2
 	);
 	sig = sig * 0.2!2;
+	sig = sig * env;
 }.play
 )
+
+// we didn't multiply the signal by the envelope.
 
 
 //Problem 5
@@ -103,6 +118,8 @@ f.free; //and finally run me
 {
 	var sig;
 	sig = PinkNoise.ar(0.2);
+	sig = Pan2.ar(sig, 0, 1.0);
+
 }.play
 )
 
