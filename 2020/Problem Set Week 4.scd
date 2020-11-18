@@ -126,11 +126,33 @@ x.free;
 //Problem 6
 //Modify your work from the previous problem so that the sound slowly oscillates back and forth between the left and right speaker (instead of being fixed in the center), at a frequency of 1 Hz, i.e. a full "left-right-left" cycle once per second.
 
+(
+{
+	var sig, lr;
+	lr = SinOsc.kr(1);
+	sig = PinkNoise.ar(0.2);
+	sig = Pan2.ar(sig, lr, 1.0);
 
+}.play
+)
 
 //Problem 7
 //Modify your work from the previous problem, adding an amplitude envelope, so that the spatial noise gradually fades in over 5 seconds, then fades out over 5 seconds. Make sure the Synth process automatically frees itself after the envelope is complete.
 
+(
+{
+	var sig, lr, env;
+	env = EnvGen.kr(Env.new(
+		[0,1,0],
+		[5,5],
+		[\lin]
+	),doneAction:2);
+	lr = SinOsc.kr(1);
+	sig = PinkNoise.ar(0.2);
+	sig = Pan2.ar(sig, lr, env);
+
+}.play
+)
 
 
 
@@ -139,10 +161,19 @@ x.free;
 
 (
 {
-	var sig;
-	sig = Saw.ar(80);
-	sig = LPF.ar(sig, 1000);
-	sig = sig * 0.3!2;
+	var sig, amp, cutoff;
+	amp = EnvGen.kr(Env.new(
+		[0.8,0],
+		[0.3],
+		[\lin]), doneAction:2);
+	cutoff = EnvGen.kr(Env.new(
+		[10000, 10],
+		[0.3],
+		[\exp]
+	));
+	sig = Saw.ar([50, 60, 90]);
+	sig = LPF.ar(sig, cutoff);
+	sig = (sig * amp)!2;
 }.play
 )
 
@@ -156,9 +187,32 @@ x.free;
 
 //d. Tweak the parameters of these two envelopes (particularly the Env curves) so that it sounds like a nice *juicy* stab.
 
-
-
-
+(
+~synthstab = {
+	arg pan = 0, freq = 15;
+	var sig, amp, cutoff, fund, chords;
+	freq = freq;
+	amp = EnvGen.kr(Env.new(
+		[1,0.3],
+		[03],
+		[\lin]), doneAction:2);
+	cutoff = EnvGen.kr(Env.new(
+		[20000, 10],
+		[03],
+		[\exp]
+	));
+	chords = [1, 1.5, 1.3333, 2, 3];
+	sig = Saw.ar(freq);
+	chords.do({arg n; (sig = sig + Pan2.ar(Saw.ar(n * freq), rrand(-0.9, 0.9)))});
+	sig = LPF.ar(sig, cutoff);
+	sig = Pan2.ar((sig * amp), pan, 0.2);
+}
+)
+(
+x = ~synthstab.play(args:[
+	\freq, [31,32,33,34].midicps.choose,
+	\pan, (-1)]);
+)
 
 
 //Problem 9
@@ -182,4 +236,30 @@ x.free;
 //Modify your the synth stab function so that it has a "chorus" effect. Each time the function is played, it should produce eight slightly detuned voices. Compensate for the increase in amplitude, if necessary. Copy and paste your chords from the previous problem to demonstrate your chorus effect.
 
 
+(
+~synthstab = {
+	arg pan = 0, freq = 15;
+	var sig, amp, cutoff, fund, chords;
+	freq = freq;
+	amp = EnvGen.kr(Env.new(
+		[1,0.3],
+		[03],
+		[\lin]), doneAction:2);
+	cutoff = EnvGen.kr(Env.new(
+		[20000, 10],
+		[03],
+		[\exp]
+	));
+	chords = [1, 5, 8, 10, 12];
+	sig = Saw.ar(freq);
+	chords.do({arg n; (sig = sig + Pan2.ar(Saw.ar(n * freq), rrand(-1, 1)))});
+	sig = LPF.ar(sig, cutoff);
+	sig = Pan2.ar((sig * amp), pan, 0.2);
+}
+)
+(
+x = ~synthstab.play(args:[
+	\freq, [31,32,33,34].midicps.choose,
+	\pan, (0)]);
+)
 
