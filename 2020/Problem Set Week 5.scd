@@ -56,6 +56,7 @@ x = {
 	sig = BPF.ar(sig, 880, 0.02, amp);
 }.play
 )
+s.scope
 
 
 //Problem 4
@@ -121,7 +122,22 @@ x = {
 
 //Modify this code, using principles of Multichannel Expansion, so that the amplitude of each of the 16 pulse waves drifts between 0 and 1 slowly, randomly, and uniquely (i.e. don't use one random UGen to control the amplitude of all 16 pulse waves — use an array of 16 unique UGens, one for each pulse wave amplitude). LFNoise1 is a good choice for a slow-moving, random signal.
 
+(
+x = {
+	var sig, freqs, amps;
+	amps = 16.collect({LFNoise1.kr(rrand(0.1,0.5))});
+	freqs = Array.exprand(16, 50, 1000).round(50);
+	freqs = freqs * Array.rand(16, 0.99, 1.01); //"chorus" effect (detune slightly)
+	sig = Pulse.ar(freqs);
+	sig = Splay.ar(sig);
+	sig = sig * amps;
+	sig = sig.sum;
+	sig = sig/16
+}.play
+)
+y = 8.collect({LFNoise1.kr(rrand(0.1,0.5))})
 
+s.options.numOutputBusChannels = 8
 
 
 
