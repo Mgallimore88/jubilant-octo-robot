@@ -129,9 +129,8 @@ x.free;
 (
 {
 	var sig, lr;
-	lr = SinOsc.kr(1);
 	sig = PinkNoise.ar(0.2);
-	sig = Pan2.ar(sig, lr, 1.0);
+	sig = Pan2.ar(sig, SinOsc.kr(1));
 
 }.play
 )
@@ -239,7 +238,7 @@ x = ~synthstab.play(args:[
 (
 ~synthstab = {
 	arg pan = 0, freq = 15;
-	var sig, amp, cutoff, fund, chords;
+	var sig, amp, cutoff, fund, chords, chorus;
 	freq = freq;
 	amp = EnvGen.kr(Env.new(
 		[1,0.3],
@@ -251,10 +250,11 @@ x = ~synthstab.play(args:[
 		[\exp]
 	));
 	chords = [1, 5, 8, 10, 12];
+	chorus = chords + 0.05*chords;
 	sig = Saw.ar(freq);
-	chords.do({arg n; (sig = sig + Pan2.ar(Saw.ar(n * freq), rrand(-1, 1)))});
+	chords.do({arg n; (sig = sig + Pan2.ar(Saw.ar(n * freq + (chorus * freq)), rrand(-1, 1)))});
 	sig = LPF.ar(sig, cutoff);
-	sig = Pan2.ar((sig * amp), pan, 0.2);
+	sig = Pan2.ar((sig * amp), pan, 0.1);
 }
 )
 (
@@ -262,4 +262,8 @@ x = ~synthstab.play(args:[
 	\freq, [31,32,33,34].midicps.choose,
 	\pan, (0)]);
 )
+
+	c = [1, 5, 8, 10, 12];
+c
+c * rrand(-0.01,0.01)
 
